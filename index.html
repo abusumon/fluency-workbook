@@ -1,0 +1,597 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font-size:14px;font-family:system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style></head><body>
+<title>The Fluency Workbook</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: sticky chapter rail on the left, one reading column on the right; every Part owns a hue that tints its chapters. */
+:root{
+  --bg:#F3F5FB; --surface:#FFFFFF; --ink:#151A2C; --muted:#586079; --line:#DBE0EE;
+  --code-bg:#151A2E; --code-fg:#E4E8F6; --code-dim:#8C93B3;
+  --p0:#8A5A1F; --p8:#0F6FA8; --p9:#9A6F00; --pa:#5F7000; --pr:#B4235F; --p1:#2F5BEA; --p2:#C2247A; --p3:#B86E00; --p4:#0A8A82; --p5:#6B3FD6; --p6:#D33E2B; --p7:#2D8632;
+  --ok:#1E8E4F; --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-code:"JetBrains Mono", ui-monospace, "Cascadia Code", Menlo, monospace;
+  --hl-kw:#FF8FC7; --hl-str:#9BE39B; --hl-num:#FFC46B; --hl-com:#7F88AA; --hl-fn:#8FB4FF; --hl-type:#6FE3D8;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0D1020; --surface:#151930; --ink:#E7EAF5; --muted:#9BA2C0; --line:#272C48;
+  --code-bg:#0A0D1A; --code-fg:#E4E8F6; --code-dim:#7D84A6;
+  --p0:#E0A869; --p8:#62BDF2; --p9:#E8C04A; --pa:#C6D94F; --pr:#FF7FAE; --p1:#7C9BFF; --p2:#FF6FB4; --p3:#FFB547; --p4:#3FD6C9; --p5:#AA8DFF; --p6:#FF8A75; --p7:#7BD67F; --ok:#5BD68D; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0D1020; --surface:#151930; --ink:#E7EAF5; --muted:#9BA2C0; --line:#272C48;
+  --code-bg:#0A0D1A; --code-fg:#E4E8F6; --code-dim:#7D84A6;
+  --p0:#E0A869; --p8:#62BDF2; --p9:#E8C04A; --pa:#C6D94F; --pr:#FF7FAE; --p1:#7C9BFF; --p2:#FF6FB4; --p3:#FFB547; --p4:#3FD6C9; --p5:#AA8DFF; --p6:#FF8A75; --p7:#7BD67F; --ok:#5BD68D; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16.5px;line-height:1.6}
+a{color:var(--pc,var(--p1))}
+code{font-family:var(--f-code);font-size:.86em;background:color-mix(in srgb,var(--pc,var(--p1)) 11%,transparent);padding:.08em .35em;border-radius:4px}
+h1,h2,h3{font-family:var(--f-display);line-height:1.15;text-wrap:balance;margin:0}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--pc,var(--p1));outline-offset:2px}
+
+.shell{display:grid;grid-template-columns:290px minmax(0,1fr);min-height:100vh}
+.rail{position:sticky;top:0;height:100vh;overflow-y:auto;border-right:1px solid var(--line);background:var(--surface);padding:22px 16px 40px}
+.brand{display:flex;flex-direction:column;gap:2px;padding:0 8px 18px;text-decoration:none;color:var(--ink)}
+.brand b{font-family:var(--f-display);font-size:1.35rem;font-weight:800;letter-spacing:-.01em}
+.brand span{font-size:.8rem;color:var(--muted)}
+.prog{margin:0 8px 18px;display:flex;flex-direction:column;gap:6px;font-size:.78rem;color:var(--muted)}
+.bar{height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--p1),var(--p2),var(--p3),var(--p4),var(--p5),var(--p6),var(--p7));border-radius:99px;transition:width .4s}
+.navpart{margin-top:14px}
+.navpart h4{font-family:var(--f-display);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--pc);margin:0 8px 4px}
+.navlink{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:8px;color:var(--ink);text-decoration:none;font-size:.92rem;line-height:1.3}
+.navlink:hover{background:color-mix(in srgb,var(--pc) 9%,transparent)}
+.navlink.on{background:color-mix(in srgb,var(--pc) 15%,transparent);font-weight:700}
+.navlink .num{font-family:var(--f-code);font-size:.72rem;color:var(--pc);min-width:1.6em}
+.navlink .dot{margin-left:auto;width:28px;height:4px;border-radius:9px;background:var(--line);overflow:hidden;flex:none}
+.navlink .dot i{display:block;height:100%;background:var(--pc)}
+.railtools{display:flex;gap:6px;margin:20px 8px 0}
+.chip{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:99px;padding:4px 12px;font-size:.8rem}
+.chip.on{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+
+.main{min-width:0;padding-block:40px 90px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.col{max-width:780px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+.topbar{display:none}
+
+/* Home */
+.hero{padding:34px 0 8px;display:flex;flex-direction:column;gap:16px}
+.hero .eyebrow{font-family:var(--f-code);font-size:.8rem;color:var(--muted)}
+.hero h1{font-size:clamp(2.4rem,6vw,4rem);font-weight:800;letter-spacing:-.03em}
+.hero h1 em{font-style:normal;background:linear-gradient(90deg,var(--p1),var(--p2) 40%,var(--p3) 70%,var(--p4));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{font-size:1.12rem;color:var(--muted);max-width:62ch;margin:0}
+.spectrum{display:flex;height:10px;border-radius:99px;overflow:hidden}
+.spectrum i{flex:1}
+.sec{display:flex;flex-direction:column;gap:14px}
+.sec>h2{font-size:1.6rem;font-weight:700}
+.sec>p{margin:0;color:var(--muted);max-width:65ch}
+.loop{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.loop div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.loop b{font-family:var(--f-display);font-size:1.05rem}
+.loop span{font-size:.9rem;color:var(--muted)}
+.loop small{font-family:var(--f-code);font-size:.72rem;color:var(--p2)}
+.road{display:flex;flex-direction:column;border-left:3px solid var(--line);margin-left:8px}
+.month{position:relative;padding:4px 0 18px 22px;display:flex;flex-direction:column;gap:4px}
+.month::before{content:"";position:absolute;left:-9px;top:8px;width:15px;height:15px;border-radius:50%;background:var(--pc);box-shadow:0 0 0 4px var(--bg)}
+.month .when{font-family:var(--f-code);font-size:.75rem;color:var(--pc);font-weight:600}
+.month h3{font-size:1.15rem}
+.month p{margin:0;font-size:.95rem;color:var(--muted)}
+.month .chs{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.month .chs a{font-size:.78rem;text-decoration:none;border:1px solid color-mix(in srgb,var(--pc) 45%,transparent);border-radius:99px;padding:1px 9px}
+.res{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.resgroup{background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--pc);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.resgroup h3{font-size:1rem;color:var(--pc)}
+.resgroup ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
+.resgroup li{font-size:.88rem;line-height:1.4}
+.resgroup li a{font-weight:700;text-decoration:none}
+.resgroup li span{display:block;color:var(--muted)}
+.tag{font-family:var(--f-code);font-size:.66rem;border-radius:4px;padding:0 5px;margin-left:4px;vertical-align:1px;background:color-mix(in srgb,var(--pc) 14%,transparent);color:var(--pc);font-weight:600}
+.grid7{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.pcard{display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:12px;text-decoration:none;color:var(--ink);background:color-mix(in srgb,var(--pc) 10%,var(--surface));border:1px solid color-mix(in srgb,var(--pc) 30%,transparent)}
+.pcard b{font-family:var(--f-display);font-size:.98rem;line-height:1.2}
+.pcard span{font-size:.75rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.pcard .bar i{background:var(--pc)}
+.note{border-left:4px solid var(--p3);background:color-mix(in srgb,var(--p3) 9%,var(--surface));padding:12px 16px;border-radius:0 10px 10px 0;font-size:.95rem}
+
+/* Lessons & careers */
+.lesson{display:flex;flex-direction:column;gap:10px;padding:18px 20px;border-radius:14px;background:var(--surface);border:1px solid var(--line);min-width:0}
+.lesson h3{font-size:1.22rem}
+.lesson .lbody p,.lesson .lbody li{max-width:68ch}
+.lesson .lbody p{margin:0 0 8px} .lesson .lbody p:last-child{margin-bottom:0}
+.lesson .lbody ul,.lesson .lbody ol{margin:0 0 8px;padding-left:1.25em;display:flex;flex-direction:column;gap:5px}
+.lesson .lbody table{margin:6px 0}
+.lesson .lbody td,.lesson .lbody th{border-bottom:1px solid var(--line)}
+.lesson.math{background:color-mix(in srgb,var(--pc) 6%,var(--surface));border-color:color-mix(in srgb,var(--pc) 28%,transparent)}
+.lesson .lnum{font-family:var(--f-code);font-size:.75rem;color:var(--pc);font-weight:600}
+.lbody mjx-container[display="true"]{overflow-x:auto;overflow-y:hidden;max-width:100%;padding:4px 0}
+.lbody mjx-container:not([display="true"]){display:inline-block;max-width:100%;overflow-x:auto;overflow-y:hidden;vertical-align:middle}
+.stack{display:flex;flex-direction:column;gap:14px}
+.needs{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:.82rem;color:var(--muted)}
+.needs a{text-decoration:none;border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:1px 10px;color:var(--ink)}
+.recap{border-left:4px solid var(--pc);padding:4px 0 4px 16px}
+.recap ul{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px}
+.careers{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.career{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:10px;min-width:0;border-top:5px solid var(--pc)}
+.career h3{font-size:1.2rem}
+.career p{margin:0;font-size:.92rem}
+.career .k{font-family:var(--f-display);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--pc);font-weight:700}
+.career ul{margin:0;padding-left:1.1em;font-size:.88rem;display:flex;flex-direction:column;gap:3px}
+.career .chs{display:flex;flex-wrap:wrap;gap:5px}
+.career .chs a{font-size:.75rem;text-decoration:none;border:1px solid color-mix(in srgb,var(--pc) 45%,transparent);border-radius:99px;padding:1px 8px}
+.career .src{font-size:.78rem;color:var(--muted)}
+
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.phd{border-collapse:collapse;font-size:.84rem;min-width:960px;width:100%}
+.phd th{font-family:var(--f-display);text-align:left;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--p9);padding:10px 12px;border-bottom:2px solid var(--line);white-space:nowrap}
+.phd td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.4}
+.phd td:first-child{font-weight:700;min-width:170px}
+.phd tr:last-child td{border-bottom:0}
+.steps{display:flex;flex-direction:column;gap:10px}
+.step{display:grid;grid-template-columns:140px minmax(0,1fr);gap:14px;padding:12px 16px;background:var(--surface);border:1px solid var(--line);border-radius:12px;border-left:5px solid var(--pc)}
+.step .when{font-family:var(--f-code);font-size:.78rem;color:var(--pc);font-weight:600}
+.step b{font-family:var(--f-display);font-size:1.02rem;display:block;margin-bottom:2px}
+.step p{margin:0;font-size:.92rem}
+@media (max-width:560px){.step{grid-template-columns:1fr;gap:4px}}
+
+.ctag{font-size:.7rem;font-weight:700;letter-spacing:.04em;border-radius:99px;padding:2px 9px;background:color-mix(in srgb,var(--tc) 16%,transparent);color:var(--tc)}
+.arena{border-top:3px dashed color-mix(in srgb,var(--pa) 60%,transparent);padding-top:16px}
+.arenaintro{border-left:4px solid var(--pa);padding:2px 0 2px 14px;max-width:68ch}
+.arenaintro p{margin:0}
+
+.sub:empty{display:none}
+.sub{display:flex;flex-direction:column;gap:10px}
+.subrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.subchip{font-size:.8rem;font-weight:700;color:var(--ok);background:color-mix(in srgb,var(--ok) 12%,transparent);border-radius:99px;padding:3px 10px}
+.subwait,.substatus,.muted{font-size:.82rem;color:var(--muted)}
+.subnotes{margin:0;font-size:.9rem;color:var(--muted)}
+.btn.primary{background:var(--pc,var(--p1));border-color:var(--pc,var(--p1));color:#fff}
+a.btn{text-decoration:none;color:var(--ink)}
+.subform{display:flex;flex-direction:column;gap:10px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px}
+.subfields{display:flex;flex-wrap:wrap;gap:10px}
+.subfields label{display:flex;flex-direction:column;gap:4px;font-size:.8rem;color:var(--muted);flex:1;min-width:160px}
+.subform select,.subform input,.subform textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 10px;width:100%;box-sizing:border-box}
+.subform textarea{font-family:var(--f-code);font-size:.84rem;line-height:1.5;resize:vertical;tab-size:4}
+.subshome{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.subshome p{margin:0}
+.sublist{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:4px;font-size:.9rem}
+
+/* Chapter */
+.chhead{display:flex;flex-direction:column;gap:12px;padding:26px 0 4px}
+.chhead .kicker{font-family:var(--f-code);font-size:.8rem;color:var(--pc);font-weight:600;letter-spacing:.02em}
+.chhead h1{font-size:clamp(2rem,5vw,3rem);font-weight:800;letter-spacing:-.025em}
+.chhead .goal{font-size:1.08rem;color:var(--muted);margin:0;max-width:62ch}
+.meta{display:flex;flex-wrap:wrap;gap:8px}
+.meta span{font-size:.78rem;border-radius:99px;padding:2px 10px;background:color-mix(in srgb,var(--pc) 12%,transparent);color:var(--pc);font-weight:700}
+.primer{display:flex;flex-direction:column;gap:12px}
+.primer p,.primer li{max-width:66ch}
+.primer p{margin:0}
+.primer ul{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px}
+.label{font-family:var(--f-display);font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--pc);font-weight:700}
+.code{background:var(--code-bg);border-radius:12px;overflow:hidden;color:var(--code-fg)}
+.codebar{display:flex;align-items:center;gap:4px;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.07)}
+.codebar button{background:transparent;border:0;color:var(--code-dim);font-family:var(--f-code);font-size:.75rem;padding:3px 10px;border-radius:6px}
+.codebar button.on{background:rgba(255,255,255,.1);color:var(--code-fg)}
+.codebar .cp{margin-left:auto}
+.code pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--f-code);font-size:.84rem;line-height:1.55;tab-size:4}
+.code pre code{background:none;padding:0;font-size:inherit;color:inherit}
+.hljs-keyword,.hljs-built_in,.hljs-meta{color:var(--hl-kw)}
+.hljs-string{color:var(--hl-str)} .hljs-number,.hljs-literal{color:var(--hl-num)}
+.hljs-comment{color:var(--hl-com);font-style:italic} .hljs-title,.hljs-function{color:var(--hl-fn)} .hljs-type,.hljs-class{color:var(--hl-type)}
+.drill{border:2px dashed color-mix(in srgb,var(--pc) 55%,transparent);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.drill p{margin:0}
+.exlist{display:flex;flex-direction:column;gap:16px}
+.ex{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.ex.done{border-color:color-mix(in srgb,var(--ok) 55%,transparent)}
+.exhead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.exnum{font-family:var(--f-code);font-weight:600;color:var(--pc);font-size:.85rem}
+.exhead h3{font-size:1.18rem;flex:1;min-width:12ch}
+.diff{font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:99px;padding:2px 9px}
+.d1{background:color-mix(in srgb,var(--p7) 16%,transparent);color:var(--p7)}
+.d2{background:color-mix(in srgb,var(--p3) 18%,transparent);color:var(--p3)}
+.d3{background:color-mix(in srgb,var(--p6) 16%,transparent);color:var(--p6)}
+.exbody p{margin:0 0 8px} .exbody p:last-child{margin:0}
+.exbody ul,.exbody ol{margin:4px 0 8px;padding-left:1.3em}
+.extools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:5px 12px;font-size:.84rem}
+.btn:hover{border-color:var(--pc)}
+.hint{background:color-mix(in srgb,var(--pc) 8%,var(--surface));border-radius:10px;padding:10px 14px;font-size:.93rem}
+.checks{display:flex;flex-wrap:wrap;gap:14px;padding-top:10px;border-top:1px solid var(--line);font-size:.85rem;color:var(--muted)}
+.checks label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.checks input{accent-color:var(--ok);width:16px;height:16px}
+.pager{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.pager a{text-decoration:none;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 14px;display:flex;flex-direction:column;font-size:.8rem;color:var(--muted);max-width:48%}
+.pager a b{color:var(--ink);font-family:var(--f-display);font-size:1rem}
+.pager a.next{margin-left:auto;text-align:right}
+
+@media (max-width:860px){
+  .shell{grid-template-columns:1fr}
+  .rail{position:fixed;inset:0 auto 0 0;width:min(320px,86vw);z-index:20;transform:translateX(-105%);transition:transform .25s;padding-top:calc(22px + env(safe-area-inset-top,0px));padding-left:max(16px,env(safe-area-inset-left,0px))}
+  .rail.open{transform:none;box-shadow:0 0 0 100vmax rgba(0,0,0,.35)}
+  .topbar{display:flex;position:sticky;top:env(safe-area-inset-top,0px);z-index:10;align-items:center;gap:10px;background:var(--surface);border-bottom:1px solid var(--line);padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px))}
+  body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+  .topbar b{font-family:var(--f-display)}
+  .main{padding-top:20px}
+  .ex{padding:16px}
+  .pager a{max-width:100%}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="topbar"><button class="chip" id="menuBtn" aria-label="Open chapters">☰ Chapters</button><b>The Fluency Workbook</b></div>
+<div class="shell">
+  <nav class="rail" id="rail" aria-label="Chapters"></nav>
+  <main class="main"><div class="col" id="view"></div></main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>window.BOOK={chapters:[]};</script>
+<script src="ch-0.js"></script>
+<script src="ch-a.js"></script>
+<script src="ch-b.js"></script>
+<script src="ch-c.js"></script>
+<script src="ch-d.js"></script>
+<script src="ch-e.js"></script>
+<script src="ch-f.js"></script>
+<script src="ch-g.js"></script>
+<script src="ch-h.js"></script>
+<script src="ch-i.js"></script>
+<script src="arena.js"></script>
+<script src="lessons-a.js"></script>
+<script src="lessons-b.js"></script>
+<script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']]},svg:{fontCache:'global'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']},startup:{typeset:false}};</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js"></script>
+<script>
+(function(){
+const PARTS=[
+ {id:'P0',name:'Ground School',c:'--p0',blurb:'Running code, functions, assert, memory, OOP, files, git.'},
+ {id:'PR',name:'Research Track',c:'--pr',blurb:'Research habits from week one, and the NeurIPS 2027 paper sprint.'},
+ {id:'P1',name:'Fluent Foundations',c:'--p1',blurb:'Loops, containers, clean functions, complexity.'},
+ {id:'P2',name:'Data Structures & Algorithms',c:'--p2',blurb:'The patterns behind every interview and every planner.'},
+ {id:'P3',name:'Fast Code',c:'--p3',blurb:'NumPy vectorization and C++ that respects the machine.'},
+ {id:'P4',name:'Machine Learning',c:'--p4',blurb:'Linear models, classifiers and clustering from scratch.'},
+ {id:'P5',name:'Deep Learning',c:'--p5',blurb:'Backprop by hand, then PyTorch done properly.'},
+ {id:'P6',name:'Reinforcement & Multi-Agent',c:'--p6',blurb:'Bandits to DQN, then many agents at once.'},
+ {id:'PA',name:'Competition Arena',c:'--pa',blurb:'Halite, Pommerman, MineRL, AIWolf: how competitions are won.'},
+ {id:'P7',name:'Robotics & Simulation',c:'--p7',blurb:'Transforms, kinematics, control, filtering, navigation.'},
+ {id:'P8',name:'Career Labs',c:'--p8',blurb:'CUDA for NVIDIA, ROS 2 for the rover team, JAX and research practice for DeepMind.'},
+ {id:'P9',name:'Frontiers & the PhD Road',c:'--p9',blurb:'What robots still cannot do, open-world coordination, and how to become a robotics researcher.'}
+];
+const CH=window.BOOK.chapters;
+const LS=window.BOOK.lessons||{};
+{const order=['P0','PR','P1','P2','P3','P4','P5','P6','PA','P7','P8','P9'];const idx=c=>order.indexOf(c.part);const tagged=CH.map((c,i)=>[c,i]);tagged.sort((a,b)=>idx(a[0])-idx(b[0])||a[1]-b[1]);CH.splice(0,CH.length,...tagged.map(t=>t[0]))}
+const AR=window.BOOK.arena||{};CH.forEach(c=>{if(AR[c.id]&&!c.arena)c.arena=AR[c.id]});
+CH.forEach(c=>{const l=LS[c.id];if(l){c.learn=c.learn||l.learn;c.math=c.math||l.math;c.needs=c.needs||l.needs}});
+const typeset=node=>{try{if(window.MathJax&&MathJax.typesetPromise)MathJax.typesetPromise([node]).catch(()=>{})}catch(e){}};
+const pc=p=>`var(${PARTS.find(x=>x.id===p).c})`;
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let prog=store.get('fw-prog',{}), lang=store.get('fw-lang','py');
+const el=(t,a={},...kids)=>{const e=document.createElement(t);for(const[k,v]of Object.entries(a)){if(k==='html')e.innerHTML=v;else if(k==='style')e.setAttribute('style',v);else if(k.startsWith('on'))e.addEventListener(k.slice(2),v);else e.setAttribute(k,v)}for(const k of kids.flat())if(k!=null)e.append(k.nodeType?k:document.createTextNode(k));return e};
+const exId=(c,i)=>c.id+'-'+(i+1);
+const arId=(c,i)=>c.id+'-a'+(i+1);
+const nEx=c=>c.ex.length+(c.arena?c.arena.ex.length:0);
+const total=()=>CH.reduce((s,c)=>s+nEx(c),0);
+const solved=c=>c.ex.filter((_,i)=>(prog[exId(c,i)]||{}).s).length+(c.arena?c.arena.ex.filter((_,i)=>(prog[arId(c,i)]||{}).s).length:0);
+const TAGC={Halite:'--p4',Pommerman:'--p6',MineRL:'--p7',AIWolf:'--p5','AI Olympics':'--p1',All:'--pa'};
+const allSolved=()=>CH.reduce((s,c)=>s+solved(c),0);
+const DIFF={1:['d1','Warm-up'],2:['d2','Core'],3:['d3','Stretch']};
+/* ---------- Cloud: submissions, settings and cross-device progress (db + user capabilities) ---------- */
+const Cloud={db:null,user:null,owner:false,uid:null,subs:{},settings:{repo:'',branch:'main'},ready:false,progRef:null,listeners:new Set()};
+const capUse=n=>(window.claude&&window.claude.use)?Promise.resolve(window.claude.use(n)).catch(()=>null):Promise.resolve(null);
+const notify=()=>Cloud.listeners.forEach(f=>{try{f()}catch(e){}});
+let progTimer=null;
+function saveProg(){store.set('fw-prog',prog);if(Cloud.progRef){clearTimeout(progTimer);progTimer=setTimeout(()=>{Cloud.progRef.set({prog,updatedAt:new Date().toISOString()}).catch(()=>{})},1500)}}
+const STATIC_SITE=/github\.io$/.test(location.hostname);
+async function loadStatic(){try{const r=await fetch('submissions/index.json',{cache:'no-store'});if(!r.ok)return false;const j=await r.json();Cloud.static=true;Cloud.subs=j.submissions||{};Cloud.settings={repo:j.repo||'',branch:j.branch||'main'};return true}catch(e){return false}}
+async function initCloud(){
+  if(STATIC_SITE){await loadStatic();Cloud.ready=true;notify();return}
+  let tries=0;while(!(window.claude&&window.claude.use)&&tries<24){await new Promise(r=>setTimeout(r,250));tries++}
+  const [db,user]=await Promise.all([capUse('db'),capUse('user')]);
+  Cloud.db=db;Cloud.user=user;
+  try{Cloud.owner=user?await user.isOwner():false;Cloud.uid=user?await user.id():null}catch(e){}
+  if(db){
+    try{db.collection('submissions').limit(1000).onSnapshot(sn=>{const m={};sn.docs.forEach(d=>{if(d.exists)m[d.id]=d.data()});Cloud.subs=m;notify()},()=>{})}catch(e){}
+    try{db.doc('settings/github').onSnapshot(sn=>{Cloud.settings=Object.assign({repo:'',branch:'main'},sn.exists?sn.data():{});notify()},()=>{})}catch(e){}
+    if(Cloud.uid){
+      try{
+        Cloud.progRef=db.doc('data/users/'+Cloud.uid+'/progress');
+        const sn=await Cloud.progRef.get();const remote=(sn.exists&&sn.data().prog)||{};
+        let changedLocal=false,changedRemote=false;const merged={};
+        new Set([...Object.keys(prog),...Object.keys(remote)]).forEach(k=>{const a=prog[k]||{},b=remote[k]||{};const m={};['s','r','p'].forEach(f=>{if(a[f]||b[f])m[f]=true});merged[k]=m;['s','r','p'].forEach(f=>{if(!!m[f]!==!!a[f])changedLocal=true;if(!!m[f]!==!!b[f])changedRemote=true})});
+        if(changedLocal){prog=merged;store.set('fw-prog',prog);rerenderKeepScroll()}
+        if(changedRemote)await Cloud.progRef.set({prog:merged,updatedAt:new Date().toISOString()});
+      }catch(e){Cloud.progRef=null}
+    }
+  }
+  Cloud.ready=true;notify();
+}
+function rerenderKeepScroll(){const y=window.scrollY;const h=location.hash.slice(1);const c=CH.find(x=>x.id===h);if(c){renderChapter(c);renderNav(c.id)}else{renderHome();renderNav('home')}window.scrollTo(0,y)}
+const slug=t=>String(t).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,48);
+const EXT={py:'py',cpp:'cpp',txt:'txt'};
+const subPath=(c,x,label,lang)=>`${String(c.n).replace(/\./g,'-')}-${slug(c.title)}/${label}-${slug(x.t)}.${EXT[lang]||'txt'}`;
+const ghUrl=s=>{const repo=s.repo||Cloud.settings.repo;return repo&&s.synced?`https://github.com/${repo}/blob/${Cloud.settings.branch||'main'}/${s.path}`:null};
+const fmtDate=iso=>{try{return new Date(iso).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'})}catch(e){return ''}};
+function renderSub(box){
+  if(box.dataset.editing==='1')return;
+  const id=box.dataset.sub,meta=box._meta;box.replaceChildren();
+  if(!Cloud.db&&!Cloud.static)return;
+  const s=Cloud.subs[id];const row=el('div',{class:'subrow'});
+  let viewer=null;
+  if(s){
+    row.append(el('span',{class:'subchip'},`✓ Submitted ${fmtDate(s.updatedAt)} · ${(LANGNAME[s.lang]||'Text')}`));
+    const vb=el('button',{class:'btn'},'View code');vb.onclick=()=>{if(viewer){viewer.remove();viewer=null;vb.textContent='View code'}else{viewer=el('div',{style:'display:flex;flex-direction:column;gap:6px'},codeBlock({[s.lang in EXT?s.lang:'txt']:s.code||''}),s.notes?el('p',{class:'subnotes'},s.notes):null);box.append(viewer);vb.textContent='Hide code'}};
+    row.append(vb);
+    const gh=ghUrl(s);
+    if(gh)row.append(el('a',{class:'btn',href:gh,target:'_blank',rel:'noopener'},'On GitHub ↗'));
+    else if(Cloud.owner&&(s.repo||Cloud.settings.repo))row.append(el('span',{class:'subwait'},'Waiting for GitHub sync'));
+  }
+  if(Cloud.owner){const eb=el('button',{class:'btn'+(s?'':' primary')},s?'Edit submission':'Submit code');eb.onclick=()=>openEditor(box,s);row.append(eb)}
+  if(row.childNodes.length)box.append(row);
+}
+const LANGNAME={py:'Python',cpp:'C++',txt:'Text'};
+function openEditor(box,s){
+  const id=box.dataset.sub,{c,x,label}=box._meta;box.dataset.editing='1';box.replaceChildren();
+  const f=el('form',{class:'subform'});
+  const langSel=el('select',{id:'lang-'+id});Object.entries(LANGNAME).forEach(([k,n])=>{const o=el('option',{value:k},n);if((s?s.lang:lang)===k)o.selected=true;langSel.append(o)});
+  const ta=el('textarea',{id:'code-'+id,rows:'14',spellcheck:'false',placeholder:'Paste your final, working code here'});ta.value=s?s.code||'':'';
+  ta.addEventListener('keydown',e=>{if(e.key==='Tab'){e.preventDefault();const a=ta.selectionStart,b=ta.selectionEnd;ta.value=ta.value.slice(0,a)+'    '+ta.value.slice(b);ta.selectionStart=ta.selectionEnd=a+4}});
+  const repo=el('input',{id:'repo-'+id,type:'text',placeholder:Cloud.settings.repo?`Default: ${Cloud.settings.repo}`:'owner/repo (optional)'});repo.value=s&&s.repo?s.repo:'';
+  const notes=el('input',{id:'notes-'+id,type:'text',placeholder:'Notes: what you learned, time taken (optional)'});notes.value=s&&s.notes?s.notes:'';
+  const status=el('span',{class:'substatus'});
+  const save=el('button',{class:'btn primary',type:'submit'},'Save submission'),cancel=el('button',{class:'btn',type:'button'},'Cancel');
+  cancel.onclick=()=>{box.dataset.editing='';renderSub(box)};
+  f.append(el('div',{class:'subfields'},el('label',{for:'lang-'+id},'Language',langSel),el('label',{for:'repo-'+id},'GitHub repo',repo)),ta,notes,el('div',{class:'subrow'},save,cancel,status));
+  f.onsubmit=async e=>{e.preventDefault();const code=ta.value;if(!code.trim()){status.textContent='Paste your code first.';return}
+    save.disabled=true;status.textContent='Saving…';const lg=langSel.value;
+    const data={chapter:c.id,chapterN:String(c.n),chapterTitle:c.title,label,title:x.t,lang:lg,code,notes:notes.value.trim(),repo:repo.value.trim(),path:subPath(c,x,label,lg),updatedAt:new Date().toISOString(),synced:false};
+    try{await Cloud.db.doc('submissions/'+id).set(data);prog[id]=Object.assign({},prog[id],{s:true});saveProg();box.dataset.editing='';const card=box.closest('.ex');if(card){card.classList.add('done');const ck=card.querySelector(`#ck-${CSS.escape(id)}-s`);if(ck)ck.checked=true}renderNav(c.id);renderSub(box)}
+    catch(err){save.disabled=false;status.textContent=err&&err.code==='quota_exceeded'?'Storage is full: delete old submissions first.':'Could not save. Check your connection and try again.'}};
+  box.append(f);ta.focus();
+}
+Cloud.listeners.add(()=>document.querySelectorAll('[data-sub]').forEach(renderSub));
+Cloud.listeners.add(()=>{const h=document.getElementById('subs-home');if(h)renderSubsHome(h)});
+function renderSubsHome(box){
+  box.replaceChildren();
+  if(!Cloud.ready){box.append(el('p',{class:'muted'},'Connecting…'));return}
+  if(!Cloud.db&&!Cloud.static){box.append(el('p',{class:'muted'},'Submissions appear here when you open the workbook signed in to claude.ai.'));return}
+  if(Cloud.static)box.append(el('p',{class:'muted'},'This is the public copy of the workbook on GitHub Pages. Submissions are made in the main workbook and copied here automatically.'));
+  const list=Object.entries(Cloud.subs).sort((a,b)=>String(b[1].updatedAt).localeCompare(String(a[1].updatedAt)));
+  const synced=list.filter(([,s])=>s.synced).length;
+  box.append(el('p',{},`${list.length} submissions saved · ${synced} on GitHub${Cloud.settings.repo?` (${Cloud.settings.repo})`:''}.`));
+  if(Cloud.owner){
+    const f=el('form',{class:'subform'});const r=el('input',{id:'gh-repo',type:'text',placeholder:'owner/repo, e.g. abusumon/fluency-workbook'});r.value=Cloud.settings.repo||'';
+    const b=el('input',{id:'gh-branch',type:'text',placeholder:'main'});b.value=Cloud.settings.branch||'main';const st=el('span',{class:'substatus'});
+    f.append(el('div',{class:'subfields'},el('label',{for:'gh-repo'},'Default GitHub repo',r),el('label',{for:'gh-branch'},'Branch',b)),el('div',{class:'subrow'},el('button',{class:'btn primary',type:'submit'},'Save settings'),st));
+    f.onsubmit=async e=>{e.preventDefault();st.textContent='Saving…';try{await Cloud.db.doc('settings/github').set({repo:r.value.trim(),branch:b.value.trim()||'main',updatedAt:new Date().toISOString()});st.textContent='Saved'}catch(err){st.textContent='Could not save settings.'}};
+    box.append(f);
+  }
+  if(list.length){const ul=el('ul',{class:'sublist'});list.slice(0,10).forEach(([id,s])=>{const gh=ghUrl(s);ul.append(el('li',{},el('a',{href:'#'+s.chapter},`${s.label} ${s.title}`),el('span',{class:'muted'},` · ${LANGNAME[s.lang]||'Text'} · ${fmtDate(s.updatedAt)}`),gh?el('a',{href:gh,target:'_blank',rel:'noopener',style:'margin-left:8px'},'GitHub ↗'):null))});box.append(ul)}
+}
+
+function codeBlock(src){
+  const LN={py:['Python','language-python'],cpp:['C++','language-cpp'],sh:['Shell','language-bash'],cmake:['CMake','language-plaintext'],txt:['Text','language-plaintext']};
+  const langs=['py','cpp','sh','cmake','txt'].filter(l=>src[l]);if(!langs.length)return null;
+  let cur=langs.includes(lang)?lang:langs[0];
+  const pre=el('pre'),bar=el('div',{class:'codebar'});
+  const show=()=>{const c=el('code',{class:LN[cur][1]});c.textContent=src[cur].replace(/^\n/,'').replace(/\s+$/,'');pre.replaceChildren(c);if(window.hljs)try{hljs.highlightElement(c)}catch(e){}bar.querySelectorAll('[data-l]').forEach(b=>b.classList.toggle('on',b.dataset.l===cur))};
+  langs.forEach(l=>bar.append(el('button',{'data-l':l,onclick:()=>{cur=l;show()}},LN[l][0])));
+  const cp=el('button',{class:'cp',onclick:()=>{const t=src[cur];const done=()=>{cp.textContent='Copied';setTimeout(()=>cp.textContent='Copy',1200)};try{navigator.clipboard.writeText(t).then(done,()=>sel())}catch(e){sel()}}},'Copy');
+  const sel=()=>{const r=document.createRange();r.selectNodeContents(pre);const s=getSelection();s.removeAllRanges();s.addRange(r)};
+  bar.append(cp);show();return el('div',{class:'code'},bar,pre);
+}
+
+function renderNav(active){
+  const r=document.getElementById('rail');r.replaceChildren();
+  const t=total(),s=allSolved();
+  r.append(el('a',{class:'brand',href:'#home'},el('b',{},'The Fluency Workbook'),el('span',{},'C++ · Python · DSA · ML · RL · Robotics')));
+  r.append(el('div',{class:'prog'},el('span',{},`${s} of ${t} exercises solved`),el('div',{class:'bar'},el('i',{style:`width:${t?s/t*100:0}%`}))));
+  r.append(el('a',{class:'navlink'+(active==='home'?' on':''),href:'#home',style:'--pc:var(--p1)'},el('span',{class:'num'},'◆'),'Roadmap & resources'));
+  PARTS.forEach(p=>{
+    const chs=CH.filter(c=>c.part===p.id);if(!chs.length)return;
+    const g=el('div',{class:'navpart',style:`--pc:${pc(p.id)}`},el('h4',{},p.name));
+    chs.forEach(c=>{const f=solved(c)/nEx(c)*100;g.append(el('a',{class:'navlink'+(active===c.id?' on':''),href:'#'+c.id},el('span',{class:'num'},typeof c.n==='number'?String(c.n).padStart(2,'0'):c.n),c.title,el('span',{class:'dot'},el('i',{style:`width:${f}%`}))))});
+    r.append(g);
+  });
+  const tools=el('div',{class:'railtools'},el('span',{style:'font-size:.8rem;color:var(--muted);align-self:center'},'Code in:'));
+  [['py','Python'],['cpp','C++']].forEach(([k,n])=>tools.append(el('button',{class:'chip'+(lang===k?' on':''),onclick:()=>{lang=k;store.set('fw-lang',k);route()}},n)));
+  r.append(tools);
+}
+
+const ROAD=[
+ {m:'Nov 2026',p:'PR',t:'Ground School and research habits',d:'Part 0, plus R1 and R3: set up your research journal, question log and paper library. From now on: 3 papers skimmed and 1 read deeply every week.',chs:['g1','g2','g3','g4','g5','g6','g7','g8','r1','r3']},
+ {m:'Dec 2026 – Jan 2027',p:'P1',t:'Foundations and core DSA',d:'Chapters 1–9 and 11 with their arenas. You graduate in December; from January you are between degrees, so treat it as full-time study (about 6 hours a day).',chs:['c01','c02','c03','c04','c05','c06','c07','c08','c09','c11']},
+ {m:'Feb – early Apr 2027',p:'P2',t:'Capstone I: the MAPF engine',d:'Graphs and shortest paths, then Capstone I, public by early April for internship applications (PFN’s 2026 summer deadline was April 19). Arrive in Japan in March with it nearly finished.',chs:['c12','c13','k1']},
+ {m:'Mar – Apr 2027',p:'P4',t:'What the paper needs first',d:'Dynamic programming, linear models and classification, neural nets and PyTorch, MDPs, how competitions are won, and the protocol version of your AIWolf agent (A5.1–A5.2).',chs:['c14','c17','c18','c20','c21','c22','a1','a5']},
+ {m:'May 2027',p:'PR',t:'Master’s under way; the paper sprint begins',d:'R2: one-page proposal, evaluation harness, baselines. Learn RL and research engineering alongside. Find a supervisor or mentor to review your proposal.',chs:['r2','c23','c28']},
+ {m:'Jun 2027',p:'P6',t:'Multi-agent depth and main experiments',d:'Multi-agent systems and open-world coordination, the LLM language layer for your agent, the first full paper draft.',chs:['c24','c36']},
+ {m:'Jul – Aug 2027',p:'PA',t:'AIWolf contest and NeurIPS submission',d:'AIWolf rounds (July–August in 2026) give real-opponent results. Ablations, final figures, and submission to a NeurIPS 2027 workshop (expect a late-August deadline).',chs:['a5','r2','c35']},
+ {m:'Sep – Nov 2027',p:'P3',t:'Extend, publish, fill the gaps',d:'Extended paper for AIWolfDial or AAMAS; arXiv. Catch up on the chapters you postponed, then fast code and the Softmax Halite league, with Pommerman and Minecraft as second benchmarks.',chs:['c10','c15','c16','a2','a3','a4']},
+ {m:'Dec 2027 – Mar 2028',p:'P7',t:'Robotics, deeply, Capstone II, and the next paper',d:'Robotics deep track, CUDA, and Capstone II on a real robot arm. Start your NeurIPS 2028 main-track project with your supervisor: an extension of the workshop paper toward multi-agent coordination. Chapter 33 (ROS 2) whenever you join a robotics team.',chs:['c25','c29','c30','c31','c32','c33','c34','k2','c26','c27']},
+ {m:'Apr 2028 onward',p:'P9',t:'Main track, top finish, PhD applications',d:'NeurIPS 2028 main track (early May, if the result is strong), AIWolf 2028 aiming for top 3, then PhD applications in the autumn.',chs:['c35','c37','a6','c19']}
+];
+const CAREERS=[
+ {p:'P8',h:'NVIDIA GEAR Lab',what:'Generalist Embodied Agent Research, led by Jim Fan and Yuke Zhu. It builds foundation models for agents and robots in simulation and the real world. Projects include GR00T (a humanoid robot foundation model), Eureka (reward design with coding LLMs) and Voyager (an LLM-powered agent in Minecraft).',
+  skills:['Deep learning at scale in PyTorch','RL and imitation learning for robots','GPU-parallel simulation (Isaac Sim / Isaac Lab)','CUDA and performance thinking','Multimodal models (vision + language + action)'],
+  chs:['c20','c21','c23','c24','c25','c26'],build:'Train a locomotion or manipulation policy with thousands of parallel environments, then write up an ablation with confidence intervals.',
+  src:['GEAR lab page','https://research.nvidia.com/labs/gear']},
+ {p:'P8',h:'Google DeepMind',what:'Research engineers turn research ideas into working, scalable experiments and evaluations. A recent research engineer posting asked for fluency in Python or C++, JAX or a similar ML framework, strong software engineering, and experience building robust model evaluations.',
+  skills:['Clean, tested Python and C++','JAX (grad, jit, vmap) as well as PyTorch','Reliable experiments and evaluations','DSA for coding interviews','Reading and reproducing papers'],
+  chs:['c03','c09','c14','c20','c23','c28'],build:'A JAX re-implementation of a known RL algorithm, with tests, many seeds, and a short paper-style report on GitHub.',
+  src:['DeepMind job posting','https://job-boards.greenhouse.io/deepmind/jobs/7263484']},
+ {p:'P9',h:'Figure AI',what:'A humanoid robot company in San Jose founded in 2022. Figure 03 was introduced in October 2025, and its Helix vision-language-action model gained whole-body autonomy with Helix 02 in January 2026, shown doing household tasks such as loading a dishwasher.',
+  skills:['Robot learning: imitation learning, VLAs, action chunking','Whole-body control, dynamics and MPC','State estimation on real hardware','Large-scale training and evaluation','Shipping reliable systems, not just demos'],
+  chs:['c30','c31','c33','c34','c35'],build:'A learned manipulation policy on a low-cost arm (for example with LeRobot), with a 100-trial evaluation and failure analysis.',
+  src:['Figure AI (Wikipedia)','https://en.wikipedia.org/wiki/Figure_AI']},
+ {p:'P8',h:'University Rover Team',what:'The University Rover Challenge is held each year at the Mars Desert Research Station in Utah. Teams compete in science, payload delivery, equipment servicing and autonomous navigation missions, plus a design review; in 2026 each was worth 100 of 500 points. Other regional rover competitions follow similar formats.',
+  skills:['ROS 2 in C++ and Python on Linux','Sensors: GNSS, IMU, cameras, encoders','Control (PID) and localisation (Kalman filters)','Path planning and marker detection','Git, interface documents, teamwork'],
+  chs:['g4','g8','c13','c25','c27'],build:'A simulated rover that follows GNSS waypoints and finds ArUco markers, ready to show the team’s software lead.',
+  src:['SpaceQ on URC 2026','https://spaceq.ca/university-of-toronto-leads-canadian-entries-at-2026-mars-rover-competition/']}
+];
+const COMPS=[
+ ['International AIWolf Contest','Running','English natural-language tracks (Turn-Based, 5 and 9 players; Anytime Utterance, 5 players). 2026 rounds: July and August, online, with the AIWolfDial workshop at INLG.','Your main contest. Arena A5.','https://aiwolfdial.github.io/aiwolf-nlp/page/inlg_2026/','AIWolf 2026 details'],
+ ['Halite (Softmax league)','Running (community)','Two Sigma’s official seasons ended with Halite IV on Kaggle (2020). Softmax runs a bit-exact Halite IV port with continuous rounds and an MMR leaderboard.','Continuous benchmark of your engineering. Arena A2.','https://softmax.com/halite','Softmax Halite'],
+ ['Pommerman','Not running','NeurIPS competitions in 2018 and 2019. The environment is open source.','Research benchmark and practice. Arena A3.','https://arxiv.org/abs/1809.07124','Pommerman paper'],
+ ['MineRL','Not running','NeurIPS competitions 2019–2022 (Diamond, then BASALT). Data and VPT models remain available.','Research benchmark; prototype in Craftax. Arena A4.','https://arxiv.org/abs/2303.13512','BASALT 2022 retrospective'],
+ ['IJCAI competitions','Yearly','2026 included the International Mahjong AI Competition, ANAC negotiation agents, and AI Olympics with RealAIGym.','Pick one per year that matches your research. Arena A6.','https://2026.ijcai.org/competitions/','IJCAI 2026 competitions'],
+ ['NeurIPS competitions','Yearly (announced ~July)','2026 had 16 competitions, including RoboSynChallenge on dexterous manipulation; none on multi-agent games.','Check the list every July. Arena A6.','https://blog.neurips.cc/2026/07/28/neurips-2026-competitions-announced/','NeurIPS 2026 list']
+];
+const PHD_STEPS=[
+ {w:'Nov 2026 – Mar 2027',p:'P0',t:'Finish undergrad, enter a master’s',d:'Graduate in December. Tsukuba’s AISIP takes April entrants only and supports a limited number with MEXT-level scholarships. Its page does not mention robotics, so choose a lab doing embodied AI, multi-agent systems or robotics, or arrange a co-advisor who does. Finish Capstone I before you arrive in March: Japanese summer-internship deadlines come in April.'},
+ {w:'Apr 2027 – Mar 2028',p:'P7',t:'Master’s year 1: a NeurIPS workshop paper',d:'Join a lab early and find a mentor with top-venue experience. Run the R2 sprint: AIWolf as the testbed, competition rounds in July–August, a NeurIPS 2027 workshop submission in late August, then an extended version for AIWolfDial or AAMAS. Robotics depth over the winter.'},
+ {w:'Apr – Sep 2028',p:'P6',t:'Master’s year 2: a main-track attempt',d:'Submit to the NeurIPS 2028 main track (early May) if the result is strong, otherwise to CoRL, AAMAS or ICRA. Aim for a top-3 AIWolf finish. Build a project page. Shortlist 15 advisors and email them in September–October with your results.'},
+ {w:'Sep – Dec 2028',p:'P9',t:'Apply',d:'US programs close in early December (MIT EECS: December 1). Japanese doctoral programs run summer and winter exams and usually expect advisor contact first. Apply broadly: besides MIT and CMU, consider Stanford, Berkeley, Washington, Georgia Tech, Penn (GRASP), ETH Zurich and TU Munich.'},
+ {w:'Jan – Mar 2029',p:'P5',t:'Interviews and the master’s thesis',d:'Prepare a 10-minute research talk (37.6) and fundamentals: backprop, Bellman equations, Kalman filters, a DSA problem. Finish and defend your thesis.'},
+ {w:'2029 – 2034',p:'P8',t:'PhD, internships, industry research',d:'PhD starts in autumn 2029 (US) or April/October 2029 (Japan). Aim for one or two research internships in the middle years at NVIDIA Research, Google DeepMind, Figure, TRI or similar. Publications from internships are the usual route to a full-time research offer.'}
+];
+const PHD=[
+ ['MIT: EECS PhD (robotics groups in CSAIL; MechE and AeroAstro also host robotics labs)','THE 2026 overall: 2','Electrical Engineering & Computer Science','https://oge.mit.edu/programs/electrical-engineering-and-computer-science','December 1, 11:59 pm ET','7.0 (TOEFL iBT 100)','Not required','$90'],
+ ['Carnegie Mellon: Robotics Institute PhD','THE 2026 overall: not checked here','Robotics (dedicated department)','https://ri.cmu.edu/?p=3314','2026 cycle per third-party listing: early Nov 18, final Dec 9. Confirm on the RI site.','Required (TOEFL preferred; IELTS and Duolingo accepted); minimum per SCS policy','Optional','$80 early / $100 final (SCS figures; confirm for RI). Admitted students are fully funded.'],
+ ['University of Tokyo: IST, Mechano-Informatics (doctoral)','THE 2026 overall: 26','Mechano-informatics, robotics','https://www.i.u-tokyo.ac.jp/edu/course/m-i/admission_e.shtml','Summer exam (oral Aug 24–28, 2026) and Winter exam (late Jan – early Feb 2027); application periods in the admission guide','TOEFL used; IELTS not mentioned','Not mentioned','In the admission guide. Guidance from your prospective advisor is required before applying.'],
+ ['Kyoto University: Graduate School of Informatics (doctoral)','THE 2026 overall: 61','Intelligence Science & Technology, Systems Science and others','https://www.i.kyoto-u.ac.jp/en/?p=994','2025 cycle: applications June 4–17, exams Aug 2–4 (check the current guidelines)','TOEFL, TOEIC or IELTS Academic (Intelligence Science & Technology)','Not mentioned','¥30,000 (refunded to MEXT students on enrolment)'],
+ ['University of Osaka: Engineering Science, MEXT Special Training Program for Robotics Engineers (M & D, in English)','THE 2026 overall: 151','Robotics (Mechanical Science & Bioengineering, Systems Innovation, Materials)','https://www.es.osaka-u.ac.jp/en/admission-aid/mext-granted/images/Robotics_2026.pdf','October 2026 entry: applied Oct 31 – Nov 14, 2025 (watch for the next yearly call)','6.0 (TOEFL iBT above 79)','Not mentioned','Exempted; MEXT stipend ¥148,000/month for doctoral students'],
+ ['Institute of Science Tokyo: International Graduate Program A','THE 2026 overall: 301–350','Integrated master’s + doctoral programs; mechanical and systems & control engineering are within the School of Engineering','https://admissions.isct.ac.jp/en/013/graduate/programs/igp/igp-a','Fall 2027 intake: applications Sep 9 – Nov 22, 2026','Not listed on the page','Not mentioned','Not listed on the page'],
+ ['University of Tsukuba: AISIP (master’s and doctoral, computer science)','THE 2026 overall: 351–400','AI social implementation (computer science)','https://www.cs.tsukuba.ac.jp/aisip','April intake only; see the current call','Not stated on the page','Not mentioned','Not stated; limited MEXT-level scholarship places']
+];
+const RES=[
+ {p:'P1',h:'C++ fluency',l:[
+  ['learncpp.com','https://www.learncpp.com/','Free, modern, and every chapter ends with a quiz. Use it as the practice partner for A Tour of C++.','free'],
+  ['Exercism C++ track','https://exercism.org/tracks/cpp','Small graded exercises with mentor feedback on style.','free'],
+  ['cppreference','https://en.cppreference.com/','The reference. Look up every std:: function you use.','free']]},
+ {p:'P1',h:'Python fluency',l:[
+  ['Exercism Python track','https://exercism.org/tracks/python','Concept-by-concept exercises with tests already written.','free'],
+  ['Fluent Python, 2nd ed.','https://www.oreilly.com/library/view/fluent-python-2nd/9781492056348/','Read after Effective Python. Teaches how Python really works.','book'],
+  ['The Missing Semester','https://missing.csail.mit.edu/','Shell, git, debugging, profiling. Tools that make you fast.','free']]},
+ {p:'P2',h:'DSA practice',l:[
+  ['CSES Problem Set','https://cses.fi/problemset/','300 classic problems. The best C++ fluency gym there is.','free'],
+  ['Competitive Programmer’s Handbook','https://cses.fi/book/book.pdf','Short, clear PDF that matches CSES exactly.','free'],
+  ['NeetCode roadmap','https://neetcode.io/roadmap','LeetCode problems grouped by pattern, with video solutions.','free'],
+  ['Algorithms, Jeff Erickson','https://jeffe.cs.illinois.edu/teaching/algorithms/','Rigorous free textbook. Good for a math student.','free']]},
+ {p:'P3',h:'Fast code',l:[
+  ['High Performance Python','https://www.oreilly.com/library/view/high-performance-python/9781492055013/','Profiling, NumPy, Numba, multiprocessing.','book'],
+  ['CS:APP','https://csapp.cs.cmu.edu/','Why caches, memory layout and compilers matter.','book']]},
+ {p:'P4',h:'Machine learning',l:[
+  ['Hands-On ML (Géron) notebooks','https://github.com/ageron/handson-ml3','The book’s full code, runnable notebook by notebook.','free code'],
+  ['ML Specialization (Andrew Ng)','https://www.coursera.org/specializations/machine-learning-introduction','Gentle theory with labs. Audit for free.','course']]},
+ {p:'P5',h:'Deep learning',l:[
+  ['Neural Networks: Zero to Hero','https://karpathy.ai/zero-to-hero.html','Karpathy builds autograd and GPT live. Type along, never copy.','free'],
+  ['Dive into Deep Learning','https://d2l.ai/','Textbook where every idea has runnable PyTorch code.','free']]},
+ {p:'P6',h:'RL & multi-agent',l:[
+  ['Sutton & Barto, 2nd ed.','http://incompleteideas.net/book/the-book-2nd.html','The RL textbook. Free PDF.','free'],
+  ['Spinning Up in Deep RL','https://spinningup.openai.com/','Clear intro to policy gradients and actor-critic.','free'],
+  ['CleanRL','https://github.com/vwxyzjn/cleanrl','Single-file RL implementations. Excellent code to read.','free code'],
+  ['Hugging Face Deep RL course','https://huggingface.co/learn/deep-rl-course','Hands-on units with environments.','free'],
+  ['Multi-Agent RL book','https://www.marl-book.com/','Albrecht, Christianos & Schäfer (MIT Press). Free PDF.','free'],
+  ['PettingZoo','https://pettingzoo.farama.org/','Standard multi-agent environment API.','library']]},
+ {p:'P7',h:'Robotics',l:[
+  ['Modern Robotics','https://hades.mech.northwestern.edu/index.php/Modern_Robotics','Lynch & Park. Free book, videos and Coursera course.','free'],
+  ['PythonRobotics','https://github.com/AtsushiSakai/PythonRobotics','Short readable implementations of planners, filters, SLAM.','free code'],
+  ['Gymnasium','https://gymnasium.farama.org/','Single-agent environment API used in Part VI.','library'],
+  ['MuJoCo','https://mujoco.org/','Physics engine for robot learning research.','library']]}
+];
+const LOOP=[
+ ['Read','10–15 min','Read the primer and type the pattern by hand. Never paste it.'],
+ ['Solve','20–45 min','Work from the TODO skeleton. Open hints only after 15 minutes stuck.'],
+ ['Rewrite','next day','Delete your file. Write it again from a blank screen, timed.'],
+ ['Port','same week','Write it in the other language. This is where fluency forms.'],
+ ['Review','weekly','Compare with a strong solution online. Write one line on what was better.']
+];
+
+function renderHome(){
+  const v=document.getElementById('view');v.style.removeProperty('--pc');v.replaceChildren();
+  v.append(el('header',{class:'hero'},
+    el('span',{class:'eyebrow'},`${CH.length} chapters · ${total()} exercises · Python + C++`),
+    el('h1',{html:'Write code without <em>stopping to think</em> about syntax.'}),
+    el('p',{},'Research-first: papers and competitions start in month one, and the roadmap aims at a NeurIPS 2027 workshop paper and the AIWolf contest. A teach-first, practice-heavy workbook for a future researcher in multi-agent simulation, robotics and RL. Every chapter explains the math first, teaches each new idea before using it, then gives you a pattern to type and 5–10 exercises with TODO skeletons. You write every solution yourself.'),
+    el('div',{style:'display:flex;gap:8px;flex-wrap:wrap'},(()=>{const last=CH.find(x=>x.id===store.get('fw-last',''));return last?el('a',{href:'#'+last.id,class:'chip on',style:'text-decoration:none'},`Continue: ${last.n}. ${last.title} →`):null})(),el('a',{href:'#g1',class:'chip'+(store.get('fw-last','')?'':' on'),style:'text-decoration:none'},'Start with Part 0: Ground School →'),el('a',{href:'#r1',class:'chip',style:'text-decoration:none'},'Research From Day One →'),el('a',{href:'#r2',class:'chip',style:'text-decoration:none'},'NeurIPS 2027 sprint →')),
+    el('div',{class:'spectrum'},...PARTS.map(p=>el('i',{style:`background:${pc(p.id)}`})))));
+  const l=el('section',{class:'sec'},el('h2',{},'The fluency loop'),el('p',{},'Reading builds understanding. Fluency comes from writing the same idea many times, from memory, under a little time pressure. Every exercise has three checkboxes for this.'));
+  const g=el('div',{class:'loop'});LOOP.forEach(([a,b,c],i)=>g.append(el('div',{},el('small',{},`${i+1} · ${b}`),el('b',{},a),el('span',{},c))));l.append(g);
+  l.append(el('div',{class:'note',html:'<b>Research rhythm:</b> every week, skim 3 papers and read 1 deeply; every two weeks, replicate one small result; every day you work, write ten lines in your research journal (Chapter R1).'}));
+  l.append(el('div',{class:'note',html:'<b>Pace:</b> about 2 hours a day, 5 days a week. Weekend: one timed contest or a CSES set, plus re-writing the week’s hardest exercise. Run everything locally (VS Code + Python 3.11+ and g++ with <code>-std=c++20 -Wall -Wextra -O2</code>).'}));
+  v.append(l);
+  const pr=el('section',{class:'sec'},el('h2',{},'Your progress'));const pg=el('div',{class:'grid7'});
+  PARTS.forEach(p=>{const chs=CH.filter(c=>c.part===p.id);const t=chs.reduce((s,c)=>s+nEx(c),0),s=chs.reduce((a,c)=>a+solved(c),0);const first=chs[0];if(!first)return;pg.append(el('a',{class:'pcard',href:'#'+first.id,style:`--pc:${pc(p.id)}`},el('b',{},p.name),el('span',{},`${s}/${t} solved · ch. ${chs[0].n}–${chs[chs.length-1].n}`),el('div',{class:'bar'},el('i',{style:`width:${t?s/t*100:0}%`}))))});
+  pr.append(pg);v.append(pr);
+  const sh=el('section',{class:'sec'},el('h2',{},'Your submissions'),el('p',{},'Paste your final working code under any exercise with “Submit code”. Anyone you share the workbook with can read it, and it is copied into your GitHub repository.'));
+  const shb=el('div',{id:'subs-home',class:'subshome'});sh.append(shb);v.append(sh);renderSubsHome(shb);
+  const cs=el('section',{class:'sec'},el('h2',{},'Where this is heading'),el('p',{},'Four targets, the skills each needs, and the chapters that matter most for it. These labs hire very selectively, mostly from graduate programs, and usually through internships. This book builds the engineering half; research experience with an advisor builds the other half.'));
+  const cg=el('div',{class:'careers'});
+  CAREERS.forEach(k=>{const box=el('article',{class:'career',style:`--pc:${pc(k.p)}`},el('h3',{},k.h),el('p',{},k.what),el('span',{class:'k'},'Skills to build'));const ul=el('ul');k.skills.forEach(x=>ul.append(el('li',{},x)));box.append(ul,el('span',{class:'k'},'Key chapters'));const ch=el('div',{class:'chs'});k.chs.forEach(id=>{const q=CH.find(x=>x.id===id);if(q)ch.append(el('a',{href:'#'+id},`${q.n}. ${q.title}`))});box.append(ch,el('span',{class:'k'},'Portfolio project'),el('p',{},k.build),el('span',{class:'src'},'Source: ',el('a',{href:k.src[1],target:'_blank',rel:'noopener'},k.src[0])));cg.append(box)});
+  cs.append(cg);v.append(cs);
+  const cc=el('section',{class:'sec'},el('h2',{},'Competition calendar'),el('p',{},'Status as of October 2026. Two of your four target competitions no longer run officially, so the plan uses the running ones to compete and the others to practise and publish. Every chapter has a Competition arena that builds toward these.'));
+  const cw=el('div',{class:'tablewrap'}),ct=el('table',{class:'phd'});
+  ct.append(el('thead',{},el('tr',{},...['Competition','Status','What it is now','Your plan','Link'].map(h=>el('th',{},h)))));
+  const cb=el('tbody');COMPS.forEach(r=>cb.append(el('tr',{},el('td',{},r[0]),el('td',{},r[1]),el('td',{},r[2]),el('td',{},r[3]),el('td',{},el('a',{href:r[4],target:'_blank',rel:'noopener'},r[5])))));
+  ct.append(cb);cw.append(ct);cc.append(cw);v.append(cc);
+  const ps=el('section',{class:'sec'},el('h2',{},'The PhD road'),el('p',{},'From a master’s in Japan to a robotics PhD at MIT, CMU or a top Japanese university, and from there to research labs like NVIDIA GEAR or Figure. Every step depends on research output, so the plan is built around getting a real paper before applications open.'));
+  const st=el('div',{class:'steps'});PHD_STEPS.forEach(x=>st.append(el('div',{class:'step',style:`--pc:${pc(x.p)}`},el('span',{class:'when'},x.w),el('div',{},el('b',{},x.t),el('p',{},x.d)))));ps.append(st);
+  ps.append(el('p',{style:'margin:6px 0 0;color:var(--muted);max-width:65ch'},'Target programs. Ranks are THE World University Rankings 2026 overall, not robotics-specific. Deadlines and fees change every year: always confirm on the official page before applying.'));
+  const tw=el('div',{class:'tablewrap'}),tb=el('table',{class:'phd'});
+  tb.append(el('thead',{},el('tr',{},...['Name','Rank','Subject','Application link','Deadlines','IELTS','GRE','Application fee'].map(h=>el('th',{},h)))));
+  const tbody=el('tbody');PHD.forEach(r=>tbody.append(el('tr',{},el('td',{},r[0]),el('td',{},r[1]),el('td',{},r[2]),el('td',{},el('a',{href:r[3],target:'_blank',rel:'noopener'},'Official page')),el('td',{},r[4]),el('td',{},r[5]),el('td',{},r[6]),el('td',{},r[7]))));
+  tb.append(tbody);tw.append(tb);ps.append(tw);v.append(ps);
+  const rd=el('section',{class:'sec'},el('h2',{},'Study roadmap: November 2026 onward'),el('p',{},'About 2 hours a day, 5 days a week, adjusted around your master’s coursework. If you join a rover team early, do Chapter 33 (ROS 2) right after Part 0 and the Chapter 25 lessons.'));
+  const road=el('div',{class:'road'});
+  ROAD.forEach(r=>{const m=el('div',{class:'month',style:`--pc:${pc(r.p)}`},el('span',{class:'when'},r.m),el('h3',{},r.t),el('p',{},r.d));const cs=el('div',{class:'chs'});r.chs.forEach(id=>{const c=CH.find(x=>x.id===id);if(c)cs.append(el('a',{href:'#'+id},`${c.n}. ${c.title}`))});m.append(cs);road.append(m)});
+  rd.append(road);v.append(rd);
+  const rs=el('section',{class:'sec'},el('h2',{},'Resources that give you practice'),el('p',{},'Chosen because each one makes you write code, not only read about it. Keep your two books; pair them with the practice sources here.'));
+  const rg=el('div',{class:'res'});
+  RES.forEach(g=>{const ul=el('ul');g.l.forEach(([n,u,d,t])=>ul.append(el('li',{},el('a',{href:u,target:'_blank',rel:'noopener'},n),el('span',{class:'tag'},t),el('span',{},d))));rg.append(el('div',{class:'resgroup',style:`--pc:${pc(g.p)}`},el('h3',{},g.h),ul))});
+  rs.append(rg);v.append(rs);
+}
+
+function renderChapter(c){
+  store.set('fw-last',c.id);
+  const v=document.getElementById('view');v.replaceChildren();v.style.setProperty('--pc',pc(c.part));
+  const part=PARTS.find(p=>p.id===c.part);
+  v.append(el('header',{class:'chhead'},el('span',{class:'kicker'},`${part.name.toUpperCase()} · CHAPTER ${c.n}`),el('h1',{},c.title),el('p',{class:'goal'},c.goal),
+    el('div',{class:'meta'},el('span',{},c.time),el('span',{},`${c.ex.length} exercises`),c.arena?el('span',{},`${c.arena.ex.length} arena`):null,el('span',{},`${solved(c)} solved`))));
+  if(c.needs&&c.needs.length){const nd=el('div',{class:'needs'},'Before this chapter:');c.needs.forEach(id=>{const q=CH.find(x=>x.id===id);if(q)nd.append(el('a',{href:'#'+id},`${q.n} ${q.title}`))});v.append(nd)}
+  const lessonCard=(ls,i,isMath)=>{const d=el('article',{class:'lesson'+(isMath?' math':'')},el('span',{class:'lnum'},(isMath?'Math ':'Lesson ')+(i+1)),el('h3',{},ls.h),el('div',{class:'lbody',html:ls.body||''}));if(ls.code){const cb=codeBlock(ls.code);if(cb)d.append(cb)}if(ls.after)d.append(el('div',{class:'lbody',html:ls.after}));return d};
+  if(c.math&&c.math.length){const m=el('section',{class:'stack'},el('span',{class:'label'},'The math first'));c.math.forEach((ls,i)=>m.append(lessonCard(ls,i,true)));v.append(m)}
+  if(c.learn&&c.learn.length){const m=el('section',{class:'stack'},el('span',{class:'label'},'Learn it'));c.learn.forEach((ls,i)=>m.append(lessonCard(ls,i,false)));v.append(m)}
+  const p=el('section',{class:'primer'},el('span',{class:'label'},'Key ideas'),el('div',{class:'primer recap',html:c.primer}));
+  if(c.pattern){p.append(el('span',{class:'label'},'Type this pattern by hand'));p.append(codeBlock(c.pattern))}
+  v.append(p);
+  const list=el('section',{class:'exlist'},el('span',{class:'label'},'Exercises'));
+  const makeCard=(x,id,label)=>{
+    const st=prog[id]||{};
+    const card=el('article',{class:'ex'+(st.s?' done':''),id:'x'+id});
+    const [dc,dn]=DIFF[x.d];
+    card.append(el('div',{class:'exhead'},el('span',{class:'exnum'},label),el('h3',{},x.t),x.tag?el('span',{class:'ctag',style:`--tc:var(${TAGC[x.tag]||'--pa'})`},x.tag):null,el('span',{class:'diff '+dc},dn)));
+    card.append(el('div',{class:'exbody',html:x.q}));
+    const tools=el('div',{class:'extools'});const extra=el('div',{style:'display:flex;flex-direction:column;gap:10px'});
+    let shown=0;const hb=x.h&&x.h.length?el('button',{class:'btn'}):null;
+    if(hb){const upd=()=>hb.textContent=shown<x.h.length?`Show hint ${shown+1} of ${x.h.length}`:'All hints shown';upd();hb.onclick=()=>{if(shown<x.h.length){const hd=el('div',{class:'hint',html:`<b>Hint ${shown+1}.</b> `+x.h[shown]});hintBox.append(hd);typeset(hd);shown++;upd()}};tools.append(hb)}
+    const hintBox=el('div',{style:'display:flex;flex-direction:column;gap:8px'});
+    if(x.py||x.cpp){let open=false,cb=null;const sb=el('button',{class:'btn'},'Show skeleton');sb.onclick=()=>{open=!open;if(open){cb=codeBlock(x);extra.append(cb);sb.textContent='Hide skeleton'}else{cb&&cb.remove();sb.textContent='Show skeleton'}};tools.append(sb)}
+    card.append(tools,hintBox,extra);
+    const sb=el('div',{class:'sub','data-sub':id});sb._meta={c,x,label};card.append(sb);renderSub(sb);
+    const ch=el('div',{class:'checks'});
+    [['s','Solved'],['r','Rewrote from blank'],['p','Ported to other language']].forEach(([k,n])=>{const inp=el('input',{type:'checkbox',id:`ck-${id}-${k}`});inp.checked=!!st[k];inp.onchange=()=>{prog[id]=Object.assign({},prog[id],{[k]:inp.checked});saveProg();card.classList.toggle('done',!!prog[id].s);renderNav(c.id)};ch.append(el('label',{for:`ck-${id}-${k}`},inp,n))});
+    card.append(ch);return card;
+  };
+  c.ex.forEach((x,i)=>list.append(makeCard(x,exId(c,i),`${c.n}.${i+1}`)));
+  v.append(list);
+  if(c.arena){const ar=el('section',{class:'exlist arena'},el('span',{class:'label',style:'color:var(--pa)'},'Competition arena'),el('div',{class:'arenaintro',html:c.arena.intro}));c.arena.ex.forEach((x,i)=>ar.append(makeCard(x,arId(c,i),`${c.n}.A${i+1}`)));v.append(ar)}
+  if(c.drill)v.append(el('div',{class:'drill'},el('span',{class:'label'},'Fluency check'),el('p',{html:c.drill})));
+  const i=CH.indexOf(c),pv=CH[i-1],nx=CH[i+1];const pg=el('nav',{class:'pager'});
+  if(pv)pg.append(el('a',{href:'#'+pv.id},'← Previous',el('b',{},`${pv.n}. ${pv.title}`)));
+  if(nx)pg.append(el('a',{class:'next',href:'#'+nx.id},'Next →',el('b',{},`${nx.n}. ${nx.title}`)));
+  v.append(pg);
+  typeset(v);
+}
+
+function route(){
+  const h=location.hash.slice(1);const c=CH.find(x=>x.id===h);
+  if(c){renderChapter(c);renderNav(c.id)}else{renderHome();renderNav('home')}
+  document.getElementById('rail').classList.remove('open');window.scrollTo(0,0);
+}
+window.addEventListener('hashchange',route);
+document.getElementById('menuBtn').onclick=e=>{e.stopPropagation();document.getElementById('rail').classList.toggle('open')};
+document.addEventListener('click',e=>{const r=document.getElementById('rail');if(r.classList.contains('open')&&!r.contains(e.target))r.classList.remove('open')});
+route();
+initCloud();
+})();
+</script>
+</body></html>
