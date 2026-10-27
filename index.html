@@ -281,8 +281,18 @@ const capUse=n=>(window.claude&&window.claude.use)?Promise.resolve(window.claude
 const notify=()=>Cloud.listeners.forEach(f=>{try{f()}catch(e){}});
 let progTimer=null;
 function saveProg(){store.set('fw-prog',prog);if(Cloud.progRef){clearTimeout(progTimer);progTimer=setTimeout(()=>{Cloud.progRef.set({prog,updatedAt:new Date().toISOString()}).catch(()=>{})},1500)}}
-const STATIC_SITE=/github\.io$/.test(location.hostname);
-async function loadStatic(){try{const r=await fetch('submissions/index.json',{cache:'no-store'});if(!r.ok)return false;const j=await r.json();Cloud.static=true;Cloud.subs=j.submissions||{};Cloud.settings={repo:j.repo||'',branch:j.branch||'main'};return true}catch(e){return false}}
+const STATIC_SITE=/github\.io$/.test(location.hostname)||/[?&]static\b/.test(location.search);
+const DEFAULT_REPO='abusumon/fluency-workbook',DEFAULT_BRANCH='main';
+async function loadStatic(){
+  Cloud.static=true;Cloud.settings={repo:DEFAULT_REPO,branch:DEFAULT_BRANCH};
+  const stems={};const add=(c,x,label,id)=>{stems[subPath(c,x,label,'txt').replace(/\.txt$/,'')]={id,c,x,label}};
+  CH.forEach(c=>{c.ex.forEach((x,i)=>add(c,x,`${c.n}.${i+1}`,exId(c,i)));if(c.arena)c.arena.ex.forEach((x,i)=>add(c,x,`${c.n}.A${i+1}`,arId(c,i)))});
+  let tree=null;try{const k='fw-tree';const cached=sessionStorage.getItem(k);if(cached){const j=JSON.parse(cached);if(Date.now()-j.t<120000)tree=j.tree}}catch(e){}
+  if(!tree){try{const r=await fetch(`https://api.github.com/repos/${DEFAULT_REPO}/git/trees/${DEFAULT_BRANCH}?recursive=1`);if(r.ok){tree=(await r.json()).tree||[];try{sessionStorage.setItem('fw-tree',JSON.stringify({t:Date.now(),tree}))}catch(e){}}}catch(e){}}
+  const m={};(tree||[]).forEach(n=>{if(n.type!=='blob'||!n.path.startsWith('submissions/'))return;const rel=n.path.slice(12);const mt=rel.match(/^(.*)\.(py|cpp|txt)$/);if(!mt)return;const hit=stems[mt[1]];if(!hit)return;
+    m[hit.id]={chapter:hit.c.id,chapterN:String(hit.c.n),chapterTitle:hit.c.title,label:hit.label,title:hit.x.t,lang:mt[2],path:rel,synced:true,raw:`https://raw.githubusercontent.com/${DEFAULT_REPO}/${DEFAULT_BRANCH}/${n.path.split('/').map(encodeURIComponent).join('/')}`}});
+  Cloud.subs=m;Cloud.treeOk=!!tree;return true;
+}
 async function initCloud(){
   if(STATIC_SITE){await loadStatic();Cloud.ready=true;notify();return}
   let tries=0;while(!(window.claude&&window.claude.use)&&tries<24){await new Promise(r=>setTimeout(r,250));tries++}
@@ -309,43 +319,62 @@ function rerenderKeepScroll(){const y=window.scrollY;const h=location.hash.slice
 const slug=t=>String(t).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,48);
 const EXT={py:'py',cpp:'cpp',txt:'txt'};
 const subPath=(c,x,label,lang)=>`${String(c.n).replace(/\./g,'-')}-${slug(c.title)}/${label}-${slug(x.t)}.${EXT[lang]||'txt'}`;
-const ghUrl=s=>{const repo=s.repo||Cloud.settings.repo;return repo&&s.synced?`https://github.com/${repo}/blob/${Cloud.settings.branch||'main'}/${s.path}`:null};
-const fmtDate=iso=>{try{return new Date(iso).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'})}catch(e){return ''}};
+const ghRepo=s=>(s&&s.repo)||Cloud.settings.repo||DEFAULT_REPO;
+const ghBranch=()=>Cloud.settings.branch||DEFAULT_BRANCH;
+const encPath=p=>p.split('/').map(encodeURIComponent).join('/');
+const ghUrl=s=>s&&s.synced?`https://github.com/${ghRepo(s)}/blob/${ghBranch()}/submissions/${encPath(s.path)}`:null;
+const fmtDate=iso=>{try{return iso?new Date(iso).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}):''}catch(e){return ''}};
+const LANGNAME={py:'Python',cpp:'C++',txt:'Text'};
+function ghCommitLinks(repo,path,code){
+  const branch=ghBranch(),full='submissions/'+path;
+  let url=`https://github.com/${repo}/new/${branch}?filename=${encodeURIComponent(full)}&value=${encodeURIComponent(code)}`,copied=false;
+  if(url.length>7500){url=`https://github.com/${repo}/new/${branch}?filename=${encodeURIComponent(full)}`;copied=true}
+  return {newUrl:url,editUrl:`https://github.com/${repo}/edit/${branch}/${encPath(full)}`,copied};
+}
 function renderSub(box){
   if(box.dataset.editing==='1')return;
-  const id=box.dataset.sub,meta=box._meta;box.replaceChildren();
+  const id=box.dataset.sub;box.replaceChildren();
   if(!Cloud.db&&!Cloud.static)return;
   const s=Cloud.subs[id];const row=el('div',{class:'subrow'});
   let viewer=null;
   if(s){
-    row.append(el('span',{class:'subchip'},`✓ Submitted ${fmtDate(s.updatedAt)} · ${(LANGNAME[s.lang]||'Text')}`));
-    const vb=el('button',{class:'btn'},'View code');vb.onclick=()=>{if(viewer){viewer.remove();viewer=null;vb.textContent='View code'}else{viewer=el('div',{style:'display:flex;flex-direction:column;gap:6px'},codeBlock({[s.lang in EXT?s.lang:'txt']:s.code||''}),s.notes?el('p',{class:'subnotes'},s.notes):null);box.append(viewer);vb.textContent='Hide code'}};
+    row.append(el('span',{class:'subchip'},`✓ Submitted${s.updatedAt?' '+fmtDate(s.updatedAt):''} · ${(LANGNAME[s.lang]||'Text')}`));
+    const vb=el('button',{class:'btn'},'View code');
+    vb.onclick=async()=>{if(viewer){viewer.remove();viewer=null;vb.textContent='View code';return}
+      let code=s.code;if(code==null&&s.raw){vb.textContent='Loading…';try{const r=await fetch(s.raw);code=r.ok?await r.text():'Could not load this file from GitHub.'}catch(e){code='Could not load this file from GitHub.'}s.code=code}
+      viewer=el('div',{style:'display:flex;flex-direction:column;gap:6px'},codeBlock({[s.lang in EXT?s.lang:'txt']:code||''}),s.notes?el('p',{class:'subnotes'},s.notes):null);box.append(viewer);vb.textContent='Hide code'};
     row.append(vb);
-    const gh=ghUrl(s);
-    if(gh)row.append(el('a',{class:'btn',href:gh,target:'_blank',rel:'noopener'},'On GitHub ↗'));
-    else if(Cloud.owner&&(s.repo||Cloud.settings.repo))row.append(el('span',{class:'subwait'},'Waiting for GitHub sync'));
+    const gh=ghUrl(s);if(gh)row.append(el('a',{class:'btn',href:gh,target:'_blank',rel:'noopener'},'On GitHub ↗'));
   }
-  if(Cloud.owner){const eb=el('button',{class:'btn'+(s?'':' primary')},s?'Edit submission':'Submit code');eb.onclick=()=>openEditor(box,s);row.append(eb)}
+  if(Cloud.owner||Cloud.static){const eb=el('button',{class:'btn'+(s?'':' primary')},s?(Cloud.static?'Update on GitHub':'Edit submission'):'Submit code');eb.onclick=()=>openEditor(box,s);row.append(eb)}
   if(row.childNodes.length)box.append(row);
 }
-const LANGNAME={py:'Python',cpp:'C++',txt:'Text'};
 function openEditor(box,s){
   const id=box.dataset.sub,{c,x,label}=box._meta;box.dataset.editing='1';box.replaceChildren();
   const f=el('form',{class:'subform'});
   const langSel=el('select',{id:'lang-'+id});Object.entries(LANGNAME).forEach(([k,n])=>{const o=el('option',{value:k},n);if((s?s.lang:lang)===k)o.selected=true;langSel.append(o)});
-  const ta=el('textarea',{id:'code-'+id,rows:'14',spellcheck:'false',placeholder:'Paste your final, working code here'});ta.value=s?s.code||'':'';
+  const ta=el('textarea',{id:'code-'+id,rows:'14',spellcheck:'false',placeholder:'Paste your final, working code here'});ta.value=s&&s.code?s.code:'';
   ta.addEventListener('keydown',e=>{if(e.key==='Tab'){e.preventDefault();const a=ta.selectionStart,b=ta.selectionEnd;ta.value=ta.value.slice(0,a)+'    '+ta.value.slice(b);ta.selectionStart=ta.selectionEnd=a+4}});
-  const repo=el('input',{id:'repo-'+id,type:'text',placeholder:Cloud.settings.repo?`Default: ${Cloud.settings.repo}`:'owner/repo (optional)'});repo.value=s&&s.repo?s.repo:'';
+  const repo=el('input',{id:'repo-'+id,type:'text',placeholder:`Default: ${Cloud.settings.repo||DEFAULT_REPO}`});repo.value=s&&s.repo?s.repo:'';
   const notes=el('input',{id:'notes-'+id,type:'text',placeholder:'Notes: what you learned, time taken (optional)'});notes.value=s&&s.notes?s.notes:'';
-  const status=el('span',{class:'substatus'});
-  const save=el('button',{class:'btn primary',type:'submit'},'Save submission'),cancel=el('button',{class:'btn',type:'button'},'Cancel');
+  const status=el('span',{class:'substatus'});const links=el('div',{class:'subrow'});
+  const canSave=!!(Cloud.db&&Cloud.owner);
+  const save=el('button',{class:'btn primary',type:'submit'},'Save in workbook');
+  const gh=el('button',{class:'btn'+(canSave?'':' primary'),type:'button'},'Commit to GitHub');
+  const cancel=el('button',{class:'btn',type:'button'},'Cancel');
   cancel.onclick=()=>{box.dataset.editing='';renderSub(box)};
-  f.append(el('div',{class:'subfields'},el('label',{for:'lang-'+id},'Language',langSel),el('label',{for:'repo-'+id},'GitHub repo',repo)),ta,notes,el('div',{class:'subrow'},save,cancel,status));
-  f.onsubmit=async e=>{e.preventDefault();const code=ta.value;if(!code.trim()){status.textContent='Paste your code first.';return}
+  gh.onclick=()=>{const code=ta.value;if(!code.trim()){status.textContent='Paste your code first.';return}
+    const L=ghCommitLinks(repo.value.trim()||Cloud.settings.repo||DEFAULT_REPO,subPath(c,x,label,langSel.value),code.endsWith('\n')?code:code+'\n');
+    if(L.copied){try{navigator.clipboard.writeText(code).then(()=>{},()=>{})}catch(e){}}
+    links.replaceChildren(el('a',{class:'btn primary',href:L.newUrl,target:'_blank',rel:'noopener'},'Open GitHub to commit ↗'),el('a',{class:'btn',href:L.editUrl,target:'_blank',rel:'noopener'},'Edit existing file ↗'));
+    status.textContent=(L.copied?'Your code is long, so it was copied: paste it on GitHub. ':'')+'On GitHub, press “Commit changes”. Use “Edit existing file” if you submitted this exercise before.'};
+  f.append(el('div',{class:'subfields'},el('label',{for:'lang-'+id},'Language',langSel),el('label',{for:'repo-'+id},'GitHub repo',repo)),ta,notes,el('div',{class:'subrow'},canSave?save:null,gh,cancel),links,status);
+  f.onsubmit=async e=>{e.preventDefault();if(!canSave)return;const code=ta.value;if(!code.trim()){status.textContent='Paste your code first.';return}
     save.disabled=true;status.textContent='Saving…';const lg=langSel.value;
-    const data={chapter:c.id,chapterN:String(c.n),chapterTitle:c.title,label,title:x.t,lang:lg,code,notes:notes.value.trim(),repo:repo.value.trim(),path:subPath(c,x,label,lg),updatedAt:new Date().toISOString(),synced:false};
-    try{await Cloud.db.doc('submissions/'+id).set(data);prog[id]=Object.assign({},prog[id],{s:true});saveProg();box.dataset.editing='';const card=box.closest('.ex');if(card){card.classList.add('done');const ck=card.querySelector(`#ck-${CSS.escape(id)}-s`);if(ck)ck.checked=true}renderNav(c.id);renderSub(box)}
+    const data={chapter:c.id,chapterN:String(c.n),chapterTitle:c.title,label,title:x.t,lang:lg,code,notes:notes.value.trim(),repo:repo.value.trim(),path:subPath(c,x,label,lg),updatedAt:new Date().toISOString()};
+    try{await Cloud.db.doc('submissions/'+id).set(data);prog[id]=Object.assign({},prog[id],{s:true});saveProg();const card=box.closest('.ex');if(card){card.classList.add('done');const ck=card.querySelector(`#ck-${CSS.escape(id)}-s`);if(ck)ck.checked=true}renderNav(c.id);save.disabled=false;status.textContent='Saved in the workbook. Use “Commit to GitHub” to publish it.'}
     catch(err){save.disabled=false;status.textContent=err&&err.code==='quota_exceeded'?'Storage is full: delete old submissions first.':'Could not save. Check your connection and try again.'}};
+  const done=el('button',{class:'btn',type:'button'},'Done');done.onclick=()=>{box.dataset.editing='';renderSub(box)};f.querySelector('.subrow').append(done);
   box.append(f);ta.focus();
 }
 Cloud.listeners.add(()=>document.querySelectorAll('[data-sub]').forEach(renderSub));
@@ -353,19 +382,18 @@ Cloud.listeners.add(()=>{const h=document.getElementById('subs-home');if(h)rende
 function renderSubsHome(box){
   box.replaceChildren();
   if(!Cloud.ready){box.append(el('p',{class:'muted'},'Connecting…'));return}
-  if(!Cloud.db&&!Cloud.static){box.append(el('p',{class:'muted'},'Submissions appear here when you open the workbook signed in to claude.ai.'));return}
-  if(Cloud.static)box.append(el('p',{class:'muted'},'This is the public copy of the workbook on GitHub Pages. Submissions are made in the main workbook and copied here automatically.'));
-  const list=Object.entries(Cloud.subs).sort((a,b)=>String(b[1].updatedAt).localeCompare(String(a[1].updatedAt)));
-  const synced=list.filter(([,s])=>s.synced).length;
-  box.append(el('p',{},`${list.length} submissions saved · ${synced} on GitHub${Cloud.settings.repo?` (${Cloud.settings.repo})`:''}.`));
-  if(Cloud.owner){
+  if(!Cloud.db&&!Cloud.static){box.append(el('p',{class:'muted'},'Submissions appear here when you open the workbook signed in to claude.ai, or on the public GitHub Pages copy.'));return}
+  const list=Object.entries(Cloud.subs).sort((a,b)=>String(b[1].updatedAt||b[1].label).localeCompare(String(a[1].updatedAt||a[1].label)));
+  if(Cloud.static)box.append(el('p',{},Cloud.treeOk?`${list.length} solutions committed to ${DEFAULT_REPO}.`:'Could not reach GitHub just now; reload in a minute to see committed solutions.'));
+  else box.append(el('p',{},`${list.length} submissions saved in this workbook. Publish any of them with “Commit to GitHub” under the exercise.`));
+  if(Cloud.owner&&Cloud.db){
     const f=el('form',{class:'subform'});const r=el('input',{id:'gh-repo',type:'text',placeholder:'owner/repo, e.g. abusumon/fluency-workbook'});r.value=Cloud.settings.repo||'';
     const b=el('input',{id:'gh-branch',type:'text',placeholder:'main'});b.value=Cloud.settings.branch||'main';const st=el('span',{class:'substatus'});
     f.append(el('div',{class:'subfields'},el('label',{for:'gh-repo'},'Default GitHub repo',r),el('label',{for:'gh-branch'},'Branch',b)),el('div',{class:'subrow'},el('button',{class:'btn primary',type:'submit'},'Save settings'),st));
     f.onsubmit=async e=>{e.preventDefault();st.textContent='Saving…';try{await Cloud.db.doc('settings/github').set({repo:r.value.trim(),branch:b.value.trim()||'main',updatedAt:new Date().toISOString()});st.textContent='Saved'}catch(err){st.textContent='Could not save settings.'}};
     box.append(f);
   }
-  if(list.length){const ul=el('ul',{class:'sublist'});list.slice(0,10).forEach(([id,s])=>{const gh=ghUrl(s);ul.append(el('li',{},el('a',{href:'#'+s.chapter},`${s.label} ${s.title}`),el('span',{class:'muted'},` · ${LANGNAME[s.lang]||'Text'} · ${fmtDate(s.updatedAt)}`),gh?el('a',{href:gh,target:'_blank',rel:'noopener',style:'margin-left:8px'},'GitHub ↗'):null))});box.append(ul)}
+  if(list.length){const ul=el('ul',{class:'sublist'});list.slice(0,12).forEach(([id,s])=>{const gh=ghUrl(s);ul.append(el('li',{},el('a',{href:'#'+s.chapter},`${s.label} ${s.title}`),el('span',{class:'muted'},` · ${LANGNAME[s.lang]||'Text'}${s.updatedAt?' · '+fmtDate(s.updatedAt):''}`),gh?el('a',{href:gh,target:'_blank',rel:'noopener',style:'margin-left:8px'},'GitHub ↗'):null))});box.append(ul)}
 }
 
 function codeBlock(src){
@@ -512,7 +540,7 @@ function renderHome(){
   const pr=el('section',{class:'sec'},el('h2',{},'Your progress'));const pg=el('div',{class:'grid7'});
   PARTS.forEach(p=>{const chs=CH.filter(c=>c.part===p.id);const t=chs.reduce((s,c)=>s+nEx(c),0),s=chs.reduce((a,c)=>a+solved(c),0);const first=chs[0];if(!first)return;pg.append(el('a',{class:'pcard',href:'#'+first.id,style:`--pc:${pc(p.id)}`},el('b',{},p.name),el('span',{},`${s}/${t} solved · ch. ${chs[0].n}–${chs[chs.length-1].n}`),el('div',{class:'bar'},el('i',{style:`width:${t?s/t*100:0}%`}))))});
   pr.append(pg);v.append(pr);
-  const sh=el('section',{class:'sec'},el('h2',{},'Your submissions'),el('p',{},'Paste your final working code under any exercise with “Submit code”. Anyone you share the workbook with can read it, and it is copied into your GitHub repository.'));
+  const sh=el('section',{class:'sec'},el('h2',{},'Your submissions'),el('p',{},'Paste your final working code under any exercise with “Submit code”, then “Commit to GitHub” opens GitHub with the file path and code filled in. The public copy of the workbook at abusumon.github.io/fluency-workbook shows every committed solution.'));
   const shb=el('div',{id:'subs-home',class:'subshome'});sh.append(shb);v.append(sh);renderSubsHome(shb);
   const cs=el('section',{class:'sec'},el('h2',{},'Where this is heading'),el('p',{},'Four targets, the skills each needs, and the chapters that matter most for it. These labs hire very selectively, mostly from graduate programs, and usually through internships. This book builds the engineering half; research experience with an advisor builds the other half.'));
   const cg=el('div',{class:'careers'});

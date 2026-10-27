@@ -4,22 +4,20 @@ A research-first, teach-first workbook for becoming a researcher in multi-agent 
 
 ## Where to read it
 
-- **Main workbook (claude.ai artifact):** the interactive version. Code is submitted there under each exercise, and progress syncs across devices.
-- **Public copy (GitHub Pages):** this repository served as a website, readable by anyone without an account. It shows every submitted solution read-only.
+- **Public copy (GitHub Pages):** <https://abusumon.github.io/fluency-workbook/>, readable by anyone without an account. It shows every committed solution, and you can commit new ones from it.
+- **Claude version (claude.ai artifact):** the same workbook with progress synced across devices and an optional place to save drafts.
 
 ## Repository layout
 
 | Path | What it is |
 | --- | --- |
 | `index.html`, `*.js` | The workbook itself (static site, no build step) |
-| `submissions/` | Solutions submitted from the workbook, one file per exercise, grouped by chapter |
-| `submissions/README.md` | Index of all submitted solutions |
-| `submissions/index.json` | Data the public copy uses to show solutions |
-| `tools/sync_submissions.py` | Writes exported submissions into `submissions/` |
+| `submissions/` | Solutions, one file per exercise, grouped by chapter |
+| `submissions/README.md` | How to add a solution and how files are named |
 
 ## How submissions get here
 
-A scheduled task runs every hour. It reads new or edited submissions from the workbook, writes them into `submissions/`, commits and pushes, then marks them as synced so the workbook shows an "On GitHub" link.
+Manually. Under any exercise, **Submit code → Commit to GitHub** opens GitHub's new-file page with the right path and your code filled in; press **Commit changes**. The public copy reads the `submissions/` folder through the GitHub API, so no build step or scheduled job is needed.
 
 ## Run locally
 
